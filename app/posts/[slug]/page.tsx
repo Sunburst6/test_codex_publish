@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPost, posts } from "../../posts";
+import CoverArt from "../../cover-art";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -41,7 +42,7 @@ export default async function PostPage({ params }: PageProps) {
           <div className="post-kicker"><span>{post.category}</span><time>2026.{post.date}</time><span>{post.readTime} MIN READ</span></div>
           <h1>{post.title}</h1>
           <p>{post.excerpt}</p>
-          <div className={`post-cover c${currentIndex + 1}`}><span>{post.symbol}</span><i /><small>HOSHIKUZU NOTE / {String(currentIndex + 1).padStart(2, "0")}</small></div>
+          <div className={`post-cover c${currentIndex + 1}`}><CoverArt index={currentIndex} symbol={post.symbol} /><small>HOSHIKUZU NOTE / {String(currentIndex + 1).padStart(2, "0")}</small></div>
         </header>
 
         <div className="post-layout">

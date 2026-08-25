@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { posts } from "./posts";
+import CoverArt from "./cover-art";
 
 const cats = ["全部", "日常", "绘画", "游戏", "音乐"];
 
@@ -36,7 +37,7 @@ export default function Home() {
       <section className="stories shell" id="stories">
         <div className="section-heading"><div><p className="eyebrow">LATEST STORIES</p><h2>最近更新</h2></div><p>沿着时间的轨迹，拾起散落的故事。</p></div>
         <div className="story-tools"><div className="filters" aria-label="文章分类">{cats.map((item) => <button key={item} className={cat === item ? "on" : ""} onClick={() => setCat(item)} aria-pressed={cat === item}>{item}</button>)}</div><span className="story-count">{String(shown.length).padStart(2, "0")} ARTICLES</span></div>
-        <div className="grid">{shown.map((post) => { const postIndex = posts.indexOf(post); return <article key={post.slug}><Link className="article-link" href={`/posts/${post.slug}`}><div className={`cover c${(postIndex % 6) + 1}`}><span className="cover-symbol">{post.symbol}</span><small>{String(postIndex + 1).padStart(2, "0")}</small><i /></div><div className="card"><div className="meta"><b>{post.category}</b><time>2026.{post.date}</time></div><h3>{post.title}</h3><p>{post.excerpt}</p><footer><small>{post.readTime} MIN READ</small><span className="read-more">阅读全文 <i>↗</i></span></footer></div></Link></article>; })}</div>
+        <div className="grid">{shown.map((post) => { const postIndex = posts.indexOf(post); return <article key={post.slug}><Link className="article-link" href={`/posts/${post.slug}`}><div className={`cover c${(postIndex % 6) + 1}`}><CoverArt index={postIndex} symbol={post.symbol} /><small>{String(postIndex + 1).padStart(2, "0")}</small></div><div className="card"><div className="meta"><b>{post.category}</b><time>2026.{post.date}</time></div><h3>{post.title}</h3><p>{post.excerpt}</p><footer><small>{post.readTime} MIN READ</small><span className="read-more">阅读全文 <i>↗</i></span></footer></div></Link></article>; })}</div>
       </section>
 
       <section className="about shell" id="about">
