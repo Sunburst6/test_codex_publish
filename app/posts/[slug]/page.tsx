@@ -5,6 +5,11 @@ import { getPost, posts } from "../../posts";
 import CoverArt from "../../cover-art";
 
 type PageProps = { params: Promise<{ slug: string }> };
+const siteUrl = "https://hoshikuzu-note-blog.netlify.app";
+
+function publishedDate(date: string) {
+  return `2026-${date.replace(".", "-")}`;
+}
 
 export const dynamicParams = false;
 
@@ -15,12 +20,30 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = getPost((await params).slug);
   if (!post) return {};
-  const title = `${post.title}｜星屑手记`;
+  const canonicalPath = `/posts/${post.slug}`;
+  const title = post.title;
+  const datePublished = publishedDate(post.date);
   return {
     title,
     description: post.excerpt,
-    openGraph: { title, description: post.excerpt, type: "article", images: [] },
-    twitter: { card: "summary", title, description: post.excerpt, images: [] },
+    keywords: [post.title, post.category, "星屑手记", "小星", "个人博客"],
+    authors: [{ name: "小星", url: `${siteUrl}/#about` }],
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      title: `${post.title}｜星屑手记`,
+      description: post.excerpt,
+      type: "article",
+      locale: "zh_CN",
+      url: canonicalPath,
+      siteName: "星屑手记",
+      publishedTime: datePublished,
+      modifiedTime: datePublished,
+      authors: ["小星"],
+      section: post.category,
+      tags: [post.category, "个人博客"],
+      images: [],
+    },
+    twitter: { card: "summary", title: `${post.title}｜星屑手记`, description: post.excerpt, images: [] },
   };
 }
 
@@ -29,9 +52,41 @@ export default async function PostPage({ params }: PageProps) {
   if (!post) notFound();
   const currentIndex = posts.indexOf(post);
   const nextPost = posts[(currentIndex + 1) % posts.length];
+  const canonicalUrl = `${siteUrl}/posts/${post.slug}`;
+  const datePublished = publishedDate(post.date);
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${canonicalUrl}#article`,
+        headline: post.title,
+        description: post.excerpt,
+        datePublished,
+        dateModified: datePublished,
+        articleSection: post.category,
+        inLanguage: "zh-CN",
+        mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+        author: { "@id": `${siteUrl}/#author` },
+        publisher: { "@id": `${siteUrl}/#author` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "首页", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "文章", item: `${siteUrl}/#stories` },
+          { "@type": "ListItem", position: 3, name: post.title, item: canonicalUrl },
+        ],
+      },
+    ],
+  };
 
   return (
     <main className="site article-site">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c") }}
+      />
       <nav className="nav shell" aria-label="文章导航">
         <Link className="brand" href="/"><span className="brand-mark">星</span><span className="brand-name">星屑手记<small>HOSHIKUZU NOTE</small></span></Link>
         <Link className="back-link" href="/#stories"><span>←</span> 返回文章列表</Link>
@@ -39,7 +94,7 @@ export default async function PostPage({ params }: PageProps) {
 
       <article className="post-shell">
         <header className="post-header">
-          <div className="post-kicker"><span>{post.category}</span><time>2026.{post.date}</time><span>{post.readTime} MIN READ</span></div>
+          <div className="post-kicker"><span>{post.category}</span><time dateTime={datePublished}>2026.{post.date}</time><span>{post.readTime} MIN READ</span></div>
           <h1>{post.title}</h1>
           <p>{post.excerpt}</p>
           <div className={`post-cover c${currentIndex + 1}`}><CoverArt index={currentIndex} symbol={post.symbol} /><small>HOSHIKUZU NOTE / {String(currentIndex + 1).padStart(2, "0")}</small></div>
